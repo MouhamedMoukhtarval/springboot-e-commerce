@@ -2,6 +2,7 @@ package com.youtube.ecommerce.controller;
 
 import com.youtube.ecommerce.entity.JwtRequest;
 import com.youtube.ecommerce.entity.JwtResponse;
+import com.youtube.ecommerce.service.AuthenticationService;
 import com.youtube.ecommerce.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class JwtController {
 
     @Autowired
-    private JwtService jwtService;
+    private AuthenticationService authenticationService;
 
     @PostMapping({"/authenticate"})
     public JwtResponse createJwtToken(@RequestBody JwtRequest jwtRequest) throws Exception {
-        return jwtService.createJwtToken(jwtRequest);
+        return authenticationService.createJwtToken(jwtRequest);
     }
 }

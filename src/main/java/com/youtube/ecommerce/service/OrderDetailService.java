@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class OrderDetailService {
 
-    private static final String ORDER_PLACED = "Placed";
+    private static final String ORDER_PLACED = "Passer";
 
     private static final String KEY = "rzp_test_AXBzvN2fkD4ESK";
     private static final String KEY_SECRET = "bsZmiVD7p1GMo6hAWiy4SHSH";
@@ -39,14 +39,12 @@ public class OrderDetailService {
     public List<OrderDetail> getAllOrderDetails(String status) {
         List<OrderDetail> orderDetails = new ArrayList<>();
 
-        if(status.equals("All")) {
+        if(status.equals("Tous")) {
             orderDetailDao.findAll().forEach(
-                    x -> orderDetails.add(x)
+                    orderDetails::add
             );
         } else {
-            orderDetailDao.findByOrderStatus(status).forEach(
-                    x -> orderDetails.add(x)
-            );
+            orderDetails.addAll(orderDetailDao.findByOrderStatus(status));
         }
 
 
@@ -55,7 +53,7 @@ public class OrderDetailService {
 
     public List<OrderDetail> getOrderDetails() {
         String currentUser = JwtRequestFilter.CURRENT_USER;
-        User user = userDao.findById(currentUser).get();
+        User user = userDao.findById(currentUser).orElse(null);
 
         return orderDetailDao.findByUser(user);
     }
@@ -64,11 +62,12 @@ public class OrderDetailService {
         List<OrderProductQuantity> productQuantityList = orderInput.getOrderProductQuantityList();
 
         for (OrderProductQuantity o: productQuantityList) {
-            Product product = productDao.findById(o.getProductId()).get();
+            Product product = productDao.findById(o.getProductId()).orElse(null);
 
             String currentUser = JwtRequestFilter.CURRENT_USER;
-            User user = userDao.findById(currentUser).get();
+            User user = userDao.findById(currentUser).orElse(null);
 
+            assert product != null;
             OrderDetail orderDetail = new OrderDetail(
                   orderInput.getFullName(),
                   orderInput.getFullAddress(),
@@ -84,7 +83,7 @@ public class OrderDetailService {
             // empty the cart.
             if(!isSingleProductCheckout) {
                 List<Cart> carts = cartDao.findByUser(user);
-                carts.stream().forEach(x -> cartDao.deleteById(x.getCartId()));
+                carts.forEach(x -> cartDao.deleteById(x.getCartId()));
             }
 
             orderDetailDao.save(orderDetail);
@@ -92,12 +91,11 @@ public class OrderDetailService {
     }
 
     public void markOrderAsDelivered(Integer orderId) {
-        OrderDetail orderDetail = orderDetailDao.findById(orderId).get();
+        OrderDetail orderDetail = orderDetailDao.findById(orderId).orElse(null);
 
-        if(orderDetail != null) {
-            orderDetail.setOrderStatus("Delivered");
-            orderDetailDao.save(orderDetail);
-        }
+        assert orderDetail != null;
+        orderDetail.setOrderStatus("Deliveré");
+        orderDetailDao.save(orderDetail);
 
     }
 
@@ -112,8 +110,7 @@ public class OrderDetailService {
 
             Order order = razorpayClient.orders.create(jsonObject);
 
-            TransactionDetails transactionDetails =  prepareTransactionDetails(order);
-            return transactionDetails;
+            return prepareTransactionDetails(order);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -125,7 +122,6 @@ public class OrderDetailService {
         String currency = order.get("currency");
         Integer amount = order.get("amount");
 
-        TransactionDetails transactionDetails = new TransactionDetails(orderId, currency, amount, KEY);
-        return transactionDetails;
+        return new TransactionDetails(orderId, currency, amount, KEY);
     }
 }

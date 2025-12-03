@@ -35,7 +35,7 @@ public class ProductService {
     public List<Product> getAllProducts(int pageNumber, String searchKey) {
         Pageable pageable = PageRequest.of(pageNumber,12);
 
-        if(searchKey.equals("")) {
+        if(searchKey.isEmpty()) {
             return (List<Product>) productDao.findAll(pageable);
         } else {
             return (List<Product>) productDao.findByProductNameContainingIgnoreCaseOrProductDescriptionContainingIgnoreCase(

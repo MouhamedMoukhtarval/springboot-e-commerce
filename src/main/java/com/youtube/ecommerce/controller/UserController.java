@@ -2,15 +2,13 @@ package com.youtube.ecommerce.controller;
 
 import com.youtube.ecommerce.entity.User;
 import com.youtube.ecommerce.service.UserService;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
-
+import jakarta.annotation.PostConstruct;
+@CrossOrigin
 @RestController
 public class UserController {
 
